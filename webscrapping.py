@@ -1,6 +1,6 @@
 import csv
 import json
-import time
+#import time
 import praw
 import prawcore
 
@@ -35,8 +35,12 @@ def scrape_pulsechain_reddit_posts(credentials_file, output_file):
 
     return pulsechain_posts"""
 
-    with open(output_file, mode='w', newline='', encoding='utf-8') as  csvfile:
-       fieldnames = ['Tile', 'Comment']
+    #output file path
+    output_file_path = '/Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/' + output_file
+
+    # open the CSV file for writing
+    with open(output_file_path, mode='w', newline='', encoding='utf-8') as  csvfile:
+        fieldnames = ['Tile', 'Comment']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
@@ -45,17 +49,17 @@ def scrape_pulsechain_reddit_posts(credentials_file, output_file):
             subreddit = reddit.subreddit(subreddit_name)
 
             try:
-                # Iterate through the top 100 hot posts in the subreddit
-                for post in subreddit.hot(limit=100):
+                # Iterate through all the hot posts in the subreddit
+                for post in subreddit.hot(): # (limit=100): extracts only the top 100 posts
                     #Extract the title and content of the post
                     title = post.title
-                    content = post.selftext
+                    #content = post.selftext
 
                     # Store the title and content as a dictionary
                     # pulsechain_posts.append({"title": title, "content": content})
 
                     #Extract comments from the post
-                    post.comments.replace_more(limit=None) # Get all comments including the nested ones
+                    post.comments.replace_more() # (limit=None) # Get all comments including the nested ones
                     comments = post.comments.list()
 
                     # write title and comments to csv file
@@ -77,6 +81,8 @@ def scrape_pulsechain_reddit_posts(credentials_file, output_file):
 # Examples usage:
 if __name__ == "__main__":
     scrape_pulsechain_reddit_posts("/Users/nectarioskisiigha/Reddit_API_credentials/config.json", "reddit_date.csv")
+
+
     """# Load credentials from the config file
     credentials = load_credentials("/Users/nectarioskisiigha/Reddit_API_credentials/config.json")"""
 
