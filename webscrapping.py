@@ -1,109 +1,132 @@
 import csv
 import json
-#import time
+# import time
 import praw
 import prawcore
+# from langdetect import detect
+import tweepy
 
 
 def load_credentials(filename):
-    with open(filename, "r") as f:
+    with open(filename, "r") as f:  # open the json file and load it
         return json.load(f)
 
-def scrape_pulsechain_reddit_posts(credentials_file, output_file):
-    #Load the credentials from the config file
-    credentials = load_credentials(credentials_file)
+
+def scrape_pulsechain_social_media(reddit_credentials_file, twitter_credentials_file, reddit_output_file,
+                                   twitter_output_file):
+    # Load the reddit credentials from the config file
+    reddit_credentials = load_credentials(reddit_credentials_file)  # credentials = load_credentials(credentials_file)
+
+    # Load the twitter credentials from the config file
+    twitter_credentials = load_credentials(twitter_credentials_file)
 
     # Initialize the Reddit API wrapper
-    reddit = praw.Reddit(client_id=credentials["reddit"]["client_id"],
-                         client_secret=credentials["reddit"]["client_secret"],
-                         user_agent=credentials["reddit"]["user_agent"])
+    reddit = praw.Reddit(client_id=reddit_credentials["reddit"]["client_id"],
+                         client_secret=reddit_credentials["reddit"]["client_secret"],
+                         user_agent=reddit_credentials["reddit"]["user_agent"])
+    # Similarly initialize the Tweepy API wrapper
+    auth = tweepy.OAuthHandler(twitter_credentials["api_key"], twitter_credentials["api_secret_key"])
+    auth.set_access_token(twitter_credentials["access_token"], twitter_credentials["access_token_secret"])
+    twitter_api = tweepy.API(auth)
 
-    # Subreddit to scrape (e.g., pulsechain, PLSX, PLS) not just r/pulsechain
-    subreddits = ["pulsechain", "PLSX", "PLS"] #subreddit = reddit.subreddit("pulsechain")
+    # output file paths
+    reddit_output_file_path = '/Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/' + reddit_output_file
+    twitter_output_file_path = '/Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/' + twitter_output_file
 
     # Initialize a list to store the extracted posts
     # pulsechain_posts = []
 
-    """# Iterate through the top 10 hot posts in the subreddit
-    for post in subreddit.hot(limit=10):
-        # Extract the title and content of the post
-        title = post.title
-        content = post.selftext
+    # Open the CSV file for writing (for both Twitter and Reddit; however, done separately)
+    with open(reddit_output_file_path, mode='w', newline='', encoding='utf-8') as reddit_csvfile, \
+            open(twitter_output_file_path, mode='w', newline='', encoding='utf-8') as twitter_csvfile:
 
-        # Store the title and content as a dictionary
-        pulsechain_posts.append({"title": title, "content": content})
+        # Reddit CSV writer
+        reddit_fieldnames = ['Title', 'Comment']
+        reddit_writer = csv.DictWriter(reddit_csvfile, fieldnames=reddit_fieldnames)
+        reddit_writer.writeheader()
 
-    return pulsechain_posts"""
+        # Twitter CSV writer
+        twitter_fieldnames = ['Source', 'Content']
+        twitter_writer = csv.DictWriter(twitter_csvfile, fieldnames=twitter_fieldnames)
+        twitter_writer.writeheader()
 
-    #output file path
-    output_file_path = '/Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/' + output_file
+        # Search for posts containing the specific keywords (e.g., pulsechain, PulseX, PLS, Richard Heart (founder)) not just r/pulsechain
+        reddit_keywords = ["Pulsechain", "PulseX", "PLS", "PLSX"]
+        twitter_keywords = ["#Pulsechain", "#PulseX", "#PLS", "#PLSX"]
 
-    # open the CSV file for writing
-    with open(output_file_path, mode='w', newline='', encoding='utf-8') as  csvfile:
-        fieldnames = ['Tile', 'Comment']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
+        # Iterate through each keyword for Reddit
+        for keyword in reddit_keywords:
+            for submission in reddit.subreddit("all").search(keyword, limit=None):
+                title = submission.title
+                submission.comments.replace_more()  # Get all comments including the nested ones
+                comments = submission.comments.list()
 
-        # Iterate through each subreddit
-        for subreddit_name in subreddits:
-            subreddit = reddit.subreddit(subreddit_name)
+                # Write the title and comments to CSV file
+                for comment in comments:
+                    reddit_writer.writerow({'Title': title, 'Comment': comment.body})
 
-            try:
-                # Iterate through all the hot posts in the subreddit
-                for post in subreddit.hot(): # (limit=100): extracts only the top 100 posts
-                    #Extract the title and content of the post
-                    title = post.title
-                    #content = post.selftext
+        # Iterate through each keyword for Twitter
+        for keyword in twitter_keywords:
+            tweets = tweepy.Cursor(twitter_api.search_tweets, q=keyword, tweet_mode='extended').items()
+            for tweet in tweets:
+                if hasattr(tweet, 'retweeted_status'):  # Check if it's a retweet
+                    twitter_writer.writerow({'Source': 'Twitter Retweet', 'Content': tweet.retweeted_status.full_text})
+                else:
+                    twitter_writer.writerow({'Source': 'Twitter Tweet', 'Content': tweet.full_text})
 
-                    # Store the title and content as a dictionary
-                    # pulsechain_posts.append({"title": title, "content": content})
+    """# open the CSV file for writing (for both twitter and Reddit; however, done separately)
+    with open(reddit_output_file_path, mode='w', newline='', encoding='utf-8') as reddit_csvfile, \
+        open(twitter_output_file_path, mode='w', newline='', encoding='utf-8') as twitter_csvfile:
 
-                    #Extract comments from the post
-                    post.comments.replace_more() # (limit=None) # Get all comments including the nested ones
-                    comments = post.comments.list()
+        # Reddit csv writer
+        reddit_fieldnames = ['Title', 'Comment']
+        reddit_writer = csv.DictWriter(reddit_csvfile, fieldnames=reddit_fieldnames)
+        reddit_writer.writeheader()
 
-                    # write title and comments to csv file
+        # Twitter CSV writer
+        twitter_fieldnames = ['Source', 'Content']
+        twitter_writer = csv.DictWriter(twitter_csvfile, fieldnames=twitter_fieldnames)
+        twitter_writer.writeheader()
+
+        with open(twitter_output_file_path, mode='w', newline='', encoding='utf-8') as twitter_csvfile:
+            twitter_fieldnames = ['Source', 'Content']
+            twitter_writer = csv.DictWriter(twitter_csvfile, fieldnames=twitter_fieldnames)
+            twitter_writer.writeheader()
+
+            # Search for posts containing the specific keywords (e.g., pulsechain, PulseX, PLS, Richard Heart (founder)) not just r/pulsechain
+            reddit_keywords = ["Pulsechain", "PulseX", "PLS", "PLSX"]  # subreddit = reddit.subreddit("pulsechain")
+            twitter_keywords = ["#Pulsechain", "#PulseX", "#PLS", "#PLSX"] # prepend '#' to each word
+            # Iterate through each keyword
+            for keyword in reddit_keywords:
+                # Collect the title and comments from Reddit
+                for submission in reddit.subreddit("all").search(keyword, limit=None):
+                    #Extract the title of the post
+                    title = submission.title
+                    #Extract the comments from the post
+                    submission.comments.replace_more() #Get all comments including the nested ones
+                    comments = submission.comments.list()
+
+                    #write the title and comments to CSV file
                     for comment in comments:
-                        writer.writerow({'Title': title, 'Comment': comment.body})
-                        #comment_body = comment.body
-                        #Store the comment body
-                        #pulsechain_posts.append({"title": title, "comment": comment})
+                        reddit_writer.writerow({'Title': title, 'Comment': comment.body})
+                    reddit_writer.writerow({'Title': 'Reddit', 'Content': title})
 
-                        # Add a delay to avoid hitting the API rate limit
-                        #time.sleep(1)  # Sleep for 1 second between requests
-            except prawcore.exceptions.NotFound as e:
-                #try-except block to catch the 'prawcore.exceptions.NotFound' exceptions
-                print(f"Subreddit '{subreddit_name}' not found or has insufficient posts: {e}")
-
-        #return pulsechain_posts
+            # iterate through each keyword for Twitter
+            for keyword in twitter_keywords:
+            # collect tweets and retweets from Twitter
+                tweets = tweepy.Cursor(twitter_api.search, q=keyword, tweet_mode='extended').items()
+                for tweet in tweets:
+                    if hasattr(tweet, 'retweeted_status'): # check if it's a retweet
+                        twitter_writer.writerow({'Source': 'Twitter Retweet', 'Content': tweet.retweeted_status.full_text})
+                    else:
+                        twitter_writer.writerow({'Source': 'Twitter Tweet', 'Content': tweet.full_text})"""
 
 
 # Examples usage:
 if __name__ == "__main__":
-    scrape_pulsechain_reddit_posts("/Users/nectarioskisiigha/Reddit_API_credentials/config.json", "reddit_date.csv")
-
-
-    """# Load credentials from the config file
-    credentials = load_credentials("/Users/nectarioskisiigha/Reddit_API_credentials/config.json")"""
-
-    # Scrape Pulsechain Reddit posts
-    #pulsechain_posts = scrape_pulsechain_reddit_posts("/Users/nectarioskisiigha/Reddit_API_credentials/config.json")
-
-    """# print the scraped data without repeating the title at every instance
-    for title, comments in scrape_pulsechain_posts.items():
-        print("Title:", title)
-        for comment in comments:
-            print("Comment:", comment)
-        print()"""
-
-    """# Print the scrapped posts
-    for post in pulsechain_posts:
-        if "content" in post:
-            print("Title:", post["title"])
-            print("Content:", post["content"])
-        elif "comment" in post:
-            print("Title:", post["title"])
-            print("Comment:", post["comment"])
-        print()"""
-
+    scrape_pulsechain_social_media("/Users/nectarioskisiigha/API_credentials/Reddit_API_credentials/redditconfig.json",
+                                   "/Users/nectarioskisiigha/API_credentials/Twitter_API_credentials/twitterconfig.json",
+                                   "reddit_data.csv",
+                                   "twitter_data.csv"
+                                   )
 
