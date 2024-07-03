@@ -1,0 +1,10 @@
+# Ignore venv directory
+venv/
+
+# Ignore specific files
+.idea/vcs.xml
+requirements.txt
+webscrapping.py
+
+# Ignore all .pyc files
+*.pyc
