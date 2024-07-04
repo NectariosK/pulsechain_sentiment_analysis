@@ -1,6 +1,6 @@
 import csv
 import json
-# import time
+import time
 import praw
 import prawcore
 # from langdetect import detect
@@ -27,7 +27,7 @@ def scrape_pulsechain_social_media(reddit_credentials_file, twitter_credentials_
     # Similarly initialize the Tweepy API wrapper
     auth = tweepy.OAuthHandler(twitter_credentials["api_key"], twitter_credentials["api_secret_key"])
     auth.set_access_token(twitter_credentials["access_token"], twitter_credentials["access_token_secret"])
-    twitter_api = tweepy.API(auth)
+    twitter_api = tweepy.API(auth, wait_onrate_limit=True, wait_on_rate_limit_notify=True) # Adding rate limit handling to Tweepy API Initialization
 
     # output file paths
     reddit_output_file_path = '/Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/' + reddit_output_file
@@ -56,71 +56,39 @@ def scrape_pulsechain_social_media(reddit_credentials_file, twitter_credentials_
 
         # Iterate through each keyword for Reddit
         for keyword in reddit_keywords:
-            for submission in reddit.subreddit("all").search(keyword, limit=None):
-                title = submission.title
-                submission.comments.replace_more()  # Get all comments including the nested ones
-                comments = submission.comments.list()
+            try:
+                for submission in reddit.subreddit("all").search(keyword, limit=None):
+                    title = submission.title
+                    submission.comments.replace_more()  # Get all comments including the nested ones
+                    comments = submission.comments.list()
 
-                # Write the title and comments to CSV file
-                for comment in comments:
-                    reddit_writer.writerow({'Title': title, 'Comment': comment.body})
+                    # Write the title and comments to CSV file
+                    for comment in comments:
+                        reddit_writer.writerow({'Title': title, 'Comment': comment.body})
+                    time.sleep(2) # Add a delay between requests to avoid hitting the subreddit rate limit
+                    #Adding an exception handling for rate limit exceedance
+            except prawcore.exceptns.TooManyRequests as e: #try-except block to handle 'TooManyRequests' exceptions
+                print(f"Rate limit exceeded for Reddit: {e}")
+                time.sleep(60) # wait before retrying
+            except Exception as e:
+                print(f"And error occured while processing Reddit data: {e}")
 
         # Iterate through each keyword for Twitter
         for keyword in twitter_keywords:
-            tweets = tweepy.Cursor(twitter_api.search_tweets, q=keyword, tweet_mode='extended').items()
-            for tweet in tweets:
-                if hasattr(tweet, 'retweeted_status'):  # Check if it's a retweet
-                    twitter_writer.writerow({'Source': 'Twitter Retweet', 'Content': tweet.retweeted_status.full_text})
-                else:
-                    twitter_writer.writerow({'Source': 'Twitter Tweet', 'Content': tweet.full_text})
-
-    """# open the CSV file for writing (for both twitter and Reddit; however, done separately)
-    with open(reddit_output_file_path, mode='w', newline='', encoding='utf-8') as reddit_csvfile, \
-        open(twitter_output_file_path, mode='w', newline='', encoding='utf-8') as twitter_csvfile:
-
-        # Reddit csv writer
-        reddit_fieldnames = ['Title', 'Comment']
-        reddit_writer = csv.DictWriter(reddit_csvfile, fieldnames=reddit_fieldnames)
-        reddit_writer.writeheader()
-
-        # Twitter CSV writer
-        twitter_fieldnames = ['Source', 'Content']
-        twitter_writer = csv.DictWriter(twitter_csvfile, fieldnames=twitter_fieldnames)
-        twitter_writer.writeheader()
-
-        with open(twitter_output_file_path, mode='w', newline='', encoding='utf-8') as twitter_csvfile:
-            twitter_fieldnames = ['Source', 'Content']
-            twitter_writer = csv.DictWriter(twitter_csvfile, fieldnames=twitter_fieldnames)
-            twitter_writer.writeheader()
-
-            # Search for posts containing the specific keywords (e.g., pulsechain, PulseX, PLS, Richard Heart (founder)) not just r/pulsechain
-            reddit_keywords = ["Pulsechain", "PulseX", "PLS", "PLSX"]  # subreddit = reddit.subreddit("pulsechain")
-            twitter_keywords = ["#Pulsechain", "#PulseX", "#PLS", "#PLSX"] # prepend '#' to each word
-            # Iterate through each keyword
-            for keyword in reddit_keywords:
-                # Collect the title and comments from Reddit
-                for submission in reddit.subreddit("all").search(keyword, limit=None):
-                    #Extract the title of the post
-                    title = submission.title
-                    #Extract the comments from the post
-                    submission.comments.replace_more() #Get all comments including the nested ones
-                    comments = submission.comments.list()
-
-                    #write the title and comments to CSV file
-                    for comment in comments:
-                        reddit_writer.writerow({'Title': title, 'Comment': comment.body})
-                    reddit_writer.writerow({'Title': 'Reddit', 'Content': title})
-
-            # iterate through each keyword for Twitter
-            for keyword in twitter_keywords:
-            # collect tweets and retweets from Twitter
-                tweets = tweepy.Cursor(twitter_api.search, q=keyword, tweet_mode='extended').items()
+            try:
+                tweets = tweepy.Cursor(twitter_api.search_tweets, q=keyword, tweet_mode='extended').items()
                 for tweet in tweets:
-                    if hasattr(tweet, 'retweeted_status'): # check if it's a retweet
+                    print(f'Tweet fetched: {tweet.full_text}') # Debugging statement if tweets are being fetched
+                    if hasattr(tweet, 'retweeted_status'):  # Check if it's a retweet
                         twitter_writer.writerow({'Source': 'Twitter Retweet', 'Content': tweet.retweeted_status.full_text})
                     else:
-                        twitter_writer.writerow({'Source': 'Twitter Tweet', 'Content': tweet.full_text})"""
-
+                        twitter_writer.writerow({'Source': 'Twitter Tweet', 'Content': tweet.full_text})
+                print(f"Finishes writing tweets for keywords: {twitter_keywords}")
+            #
+            except tweepy.TweepError as e: #try-except block to catch 'TweepError' and other generic exceptions for Twitter
+                print(f"An error occured with Twitter API: {e}")
+            except Exception as e:
+                print(f"And error occured while processing Twitter data: {e}")
 
 # Examples usage:
 if __name__ == "__main__":
