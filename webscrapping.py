@@ -67,7 +67,7 @@ def scrape_pulsechain_social_media(reddit_credentials_file, twitter_credentials_
                         reddit_writer.writerow({'Title': title, 'Comment': comment.body})
                     time.sleep(2) # Add a delay between requests to avoid hitting the subreddit rate limit
                     #Adding an exception handling for rate limit exceedance
-            except prawcore.exceptns.TooManyRequests as e: #try-except block to handle 'TooManyRequests' exceptions
+            except prawcore.exceptions.TooManyRequests as e: #try-except block to handle 'TooManyRequests' exceptions
                 print(f"Rate limit exceeded for Reddit: {e}")
                 time.sleep(60) # wait before retrying
             except Exception as e:
@@ -76,19 +76,23 @@ def scrape_pulsechain_social_media(reddit_credentials_file, twitter_credentials_
         # Iterate through each keyword for Twitter
         for keyword in twitter_keywords:
             try:
+                print(f"Searching tweets for keywords: {keyword}")  # debugging statement
                 tweets = tweepy.Cursor(twitter_api.search_tweets, q=keyword, tweet_mode='extended').items()
                 for tweet in tweets:
-                    print(f'Tweet fetched: {tweet.full_text}') # Debugging statement if tweets are being fetched
-                    if hasattr(tweet, 'retweeted_status'):  # Check if it's a retweet
-                        twitter_writer.writerow({'Source': 'Twitter Retweet', 'Content': tweet.retweeted_status.full_text})
+                    if hasattr(tweet, 'retweeted_status'):
+                        content = tweet.retweeted_status.full_text  # Retweet
+                        source = 'Twitter Retweet'
                     else:
-                        twitter_writer.writerow({'Source': 'Twitter Tweet', 'Content': tweet.full_text})
-                print(f"Finishes writing tweets for keywords: {twitter_keywords}")
-            #
-            except tweepy.TweepError as e: #try-except block to catch 'TweepError' and other generic exceptions for Twitter
-                print(f"An error occured with Twitter API: {e}")
+                        content = tweet.full_text  # Tweet
+                        source = 'Twitter Tweet'
+
+                    print(f'Tweet fetched: {content}')  # Debugging statement if tweets are being fetched
+                    twitter_writer.writerow({'Source': source, 'Content': content})  # Write tweet content once
+                print(f"Finished writing tweets for keyword: {keyword}")
+            except tweepy.TweepError as e:  # Handle 'TweepError' and other exceptions for Twitter
+                print(f"An error occurred with the Twitter API: {e}")
             except Exception as e:
-                print(f"And error occured while processing Twitter data: {e}")
+                print(f"An error occurred while processing Twitter data: {e}")
 
 # Examples usage:
 if __name__ == "__main__":
