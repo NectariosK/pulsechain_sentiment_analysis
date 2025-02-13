@@ -82,12 +82,67 @@ jupyter notebook Notebooks/pulsechain_sentiment_analysis.ipynb
 1. Fork the repository
 2. Create your feature branch
 3. Commit your changes
-4. Push to the branch
+4. Push to the branch## Machine Learning Models
+
+### Notebooks Overview
+- [pulsechain_sentiment_analysis.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis.ipynb:0:0-0:0): Main analysis notebook
+- [pulsechain_sentiment_analysis_Data_Collection.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis_Data_Collection.ipynb:0:0-0:0): Data collection and preprocessing
+- [pulsechain_sentiment_analysis_classic_ML_models.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis_classic_ML_models.ipynb:0:0-0:0): Traditional Machine Learning Models
+- [pulsechain_sentiment_analysis_Neural_Model.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis_Neural_Model.ipynb:0:0-0:0): Deep Learning Sentiment Analysis
+
+### Classic Machine Learning Models
+Our classic machine learning approach includes:
+- Logistic Regression
+- Support Vector Machines (SVM)
+- Random Forest Classifier
+- Naive Bayes
+- K-Nearest Neighbors (KNN)
+
+#### Model Evaluation Metrics
+- Accuracy
+- Precision
+- Recall
+- F1-Score
+- Confusion Matrix
+
+### Neural Network Model
+Our deep learning approach includes:
+- Recurrent Neural Networks (RNN)
+- Long Short-Term Memory (LSTM) networks
+- Word Embedding techniques
+- Sentiment classification using neural architectures
+
+#### Neural Model Features
+- Pre-trained word embeddings
+- Sequence padding
+- Dropout for regularization
+- Binary and multi-class sentiment classification
+
+### Model Comparison
+We compare traditional ML models with neural network approaches to:
+- Understand model performance
+- Assess computational efficiency
+- Evaluate sentiment prediction accuracy
+
+### Preprocessing Techniques
+- Text tokenization
+- Stop word removal
+- Lemmatization
+- Feature vectorization
+- Handling class imbalance
+
+## Model Usage
+To explore and run the models:
+1. Navigate to the `Notebooks/` directory
+2. Open the respective Jupyter notebooks
+3. Run cells sequentially to understand the model training process
+
+**Note:** Ensure all dependencies are installed before running the notebooks
 5. Create a Pull Request
 
 ## License
-[Specify your license here]
+MIT
 
 ## Contact
-Nectarios Kisiigha - [Your Email/Contact Info]
+Nectarios Kisiigha
 Project Link: https://github.com/NectariosK/pulsechain_sentiment_analysis
