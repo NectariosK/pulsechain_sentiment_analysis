@@ -85,7 +85,7 @@ jupyter notebook Notebooks/pulsechain_sentiment_analysis.ipynb
 4. Push to the branch## Machine Learning Models
 
 ### Notebooks Overview
-- [pulsechain_sentiment_analysis.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis.ipynb:0:0-0:0): Main analysis notebook
+- [pulsechain_sentiment_analysis.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis.ipynb:0:0-0:0): Main analysis playground notebook
 - [pulsechain_sentiment_analysis_Data_Collection.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis_Data_Collection.ipynb:0:0-0:0): Data collection and preprocessing
 - [pulsechain_sentiment_analysis_classic_ML_models.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis_classic_ML_models.ipynb:0:0-0:0): Traditional Machine Learning Models
 - [pulsechain_sentiment_analysis_Neural_Model.ipynb](cci:7://file:///Users/nectarioskisiigha/Documents/GitHub/pulsechain_sentiment_analysis/Notebooks/pulsechain_sentiment_analysis_Neural_Model.ipynb:0:0-0:0): Deep Learning Sentiment Analysis
@@ -131,7 +131,20 @@ We compare traditional ML models with neural network approaches to:
 - Feature vectorization
 - Handling class imbalance
 
+## Folder Structure
+pulsechain_sentiment_analysis/
+├── Notebooks/
+│   ├── v1/  # Old notebooks
+│   └── v2/  # Updated notebooks with additional comments and notes
+├── requirements.txt  # List of dependencies
+├── README.md  # Project documentation
+├── .gitignore  # Git ignore file
+├── .DS_Store  # macOS system file
+├── reddit_data.csv  # Reddit data file
+└── twitter_data.csv  # Twitter data file
+
 ## Model Usage
+To analyze sentiment, run the data collection notebook located in the Notebooks/v2 folder. You can execute the cells to gather data and view the results.
 To explore and run the models:
 1. Navigate to the `Notebooks/` directory
 2. Open the respective Jupyter notebooks
@@ -141,8 +154,11 @@ To explore and run the models:
 5. Create a Pull Request
 
 ## License
-MIT
+MIT License
+
+Related Project
+Check out the associated project for more insights: [@NectariosK's ML/AI project](https://github.com/users/NectariosK/projects/2/views/1).
 
 ## Contact
 Nectarios Kisiigha
-Project Link: https://github.com/NectariosK/pulsechain_sentiment_analysis
+Repository Link: https://github.com/NectariosK/pulsechain_sentiment_analysis
