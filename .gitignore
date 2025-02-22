@@ -8,3 +8,6 @@ webscrapping.py
 
 # Ignore all .pyc files
 *.pyc
+
+# Ignore .DS_Store Files: To prevent .DS_Store files from being tracked
+.DS_Store
