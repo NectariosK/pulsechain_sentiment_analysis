@@ -1,13 +1,66 @@
-# Ignore venv directory
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Virtual Environment
 venv/
+ENV/
+env/
 
-# Ignore specific files
-.idea/vcs.xml
-requirements.txt
-webscrapping.py
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Ignore all .pyc files
-*.pyc
-
-# Ignore .DS_Store Files: To prevent .DS_Store files from being tracked
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Data files
+*.csv
+*.pkl
+*.h5
+*.hdf5
+*.json
+Data/processed/
+
+# Logs
+logs/
+*.log
+
+# Local development settings
+.env
+.env.local
+.env.*.local
+
+# Large media files
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv
